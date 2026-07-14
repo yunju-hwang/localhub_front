@@ -1,0 +1,17 @@
+@use 'variables' as *;
+
+@mixin container {
+  max-width: $max-width;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@mixin card-shadow {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

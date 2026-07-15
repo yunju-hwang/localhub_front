@@ -1,17 +1,10 @@
 <script setup>
-import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 defineProps({
   spot: { type: Object, required: true },
   category: { type: String, required: true },
 })
-
-const liked = ref(false)
-
-function toggleLike() {
-  liked.value = !liked.value
-}
 </script>
 
 <template>
@@ -28,22 +21,6 @@ function toggleLike() {
         class="spot-card__image"
       />
       <div v-else class="spot-card__image spot-card__image--empty">이미지 없음</div>
-      <button
-        class="spot-card__like"
-        :class="{ 'spot-card__like--active': liked }"
-        type="button"
-        :aria-pressed="liked"
-        aria-label="찜하기"
-        @click.stop.prevent="toggleLike"
-      >
-        <svg viewBox="0 0 24 24" :fill="liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8">
-          <path
-            d="M12 20.5s-7.5-4.6-10-9.3C.5 8 2 4.5 5.3 4.5c2 0 3.4 1 4.7 2.7C11.3 5.5 12.7 4.5 14.7 4.5c3.3 0 4.8 3.5 3.3 6.7-2.5 4.7-10 9.3-10 9.3Z"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
     </div>
     <div class="spot-card__body">
       <h3 class="spot-card__title">{{ spot.title }}</h3>
@@ -97,30 +74,6 @@ function toggleLike() {
   justify-content: center;
   color: $color-text-muted;
   font-size: 13px;
-}
-
-.spot-card__like {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 32px;
-  height: 32px;
-  border-radius: $radius-full;
-  border: none;
-  background: rgba(255, 255, 255, 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: $color-text;
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  &--active {
-    color: #e11d48;
-  }
 }
 
 .spot-card__body {

@@ -13,6 +13,11 @@ body {
   padding: 0;
 }
 
+html {
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
+}
+
 body {
   font-family: $font-base;
   color: $color-text;

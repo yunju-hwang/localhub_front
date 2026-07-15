@@ -20,8 +20,9 @@ export const useChatbotStore = defineStore('chatbot', {
           text,
           this.messages.map((m) => ({ role: m.role, text: m.text })),
         )
-        this.messages.push({ role: 'bot', text: reply.message })
-      } catch {
+        this.messages.push({ role: 'bot', text: reply.reply })
+      } catch (err) {
+        console.error('챗봇 요청 실패:', err)
         this.messages.push({ role: 'bot', text: '죄송해요, 지금은 답변할 수 없어요. 잠시 후 다시 시도해주세요.' })
       } finally {
         this.isSending = false

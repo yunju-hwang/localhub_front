@@ -1,3 +1,5 @@
+import http from './http'
+
 const CATEGORY_FILE_MAP = {
   attraction: '부산_관광지.json',
   culture: '부산_문화시설.json',
@@ -44,4 +46,10 @@ export async function getTourismData(category) {
   }
   cache.set(category, result)
   return result
+}
+
+export function getTourismDetail(contentId, contentTypeId) {
+  return http
+    .get('/tourism/detail', { params: { content_id: contentId, content_type_id: contentTypeId } })
+    .then((res) => res.data)
 }

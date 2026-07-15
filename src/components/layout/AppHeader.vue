@@ -1,18 +1,17 @@
 <script setup>
 import { RouterLink } from 'vue-router'
+import logo from '@/assets/logo.png'
 </script>
 
 <template>
   <header class="app-header">
     <div class="app-header__inner">
       <RouterLink to="/" class="app-header__brand">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M3 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M3 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
+        <img :src="logo" alt="Busan Tour" class="app-header__logo" />
         <span>Busan Tour</span>
       </RouterLink>
       <nav class="app-header__nav">
+        <RouterLink to="/festivals">축제 캘린더</RouterLink>
         <RouterLink to="/community">커뮤니티</RouterLink>
       </nav>
     </div>
@@ -47,12 +46,12 @@ import { RouterLink } from 'vue-router'
   font-weight: 700;
   font-size: 17px;
   color: $color-text;
+}
 
-  svg {
-    width: 22px;
-    height: 22px;
-    color: $color-navy;
-  }
+.app-header__logo {
+  height: 44px;
+  width: 44px;
+  object-fit: contain;
 }
 
 .app-header__nav {

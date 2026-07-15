@@ -20,15 +20,14 @@ const form = reactive({
   passwordConfirm: '',
 })
 
-onMounted(() => {
-  community.init()
+onMounted(async () => {
   if (isEdit.value) {
     // 비밀번호 확인 없이 주소로 바로 들어온 경우 상세 페이지로 돌려보낸다.
     if (!community.isUnlocked(route.params.id)) {
       router.replace({ name: 'PostDetail', params: { id: route.params.id } })
       return
     }
-    const post = community.getById(route.params.id)
+    const post = await community.fetchPost(route.params.id)
     if (post) {
       form.title = post.title
       form.category = post.category
@@ -43,8 +42,12 @@ async function handleSubmit() {
   if (!form.title.trim() || !form.content.trim()) return
 
   if (isEdit.value) {
-    community.updatePost(route.params.id, form)
-    router.push({ name: 'PostDetail', params: { id: route.params.id } })
+    try {
+      await community.updatePost(route.params.id, form)
+      router.push({ name: 'PostDetail', params: { id: route.params.id } })
+    } catch {
+      formError.value = '수정 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.'
+    }
     return
   }
 
@@ -57,8 +60,12 @@ async function handleSubmit() {
     return
   }
 
-  const post = await community.createPost(form)
-  router.push({ name: 'PostDetail', params: { id: post.id } })
+  try {
+    const post = await community.createPost(form)
+    router.push({ name: 'PostDetail', params: { id: post.id } })
+  } catch {
+    formError.value = '등록 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.'
+  }
 }
 
 function handleCancel() {

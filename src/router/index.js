@@ -22,6 +22,11 @@ const router = createRouter({
       props: true,
     },
     {
+      path: '/festivals',
+      name: 'FestivalCalendar',
+      component: () => import('@/features/festival/views/FestivalCalendarView.vue'),
+    },
+    {
       path: '/community',
       name: 'CommunityList',
       component: () => import('@/features/community/views/CommunityListView.vue'),

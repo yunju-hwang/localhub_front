@@ -15,22 +15,35 @@ const community = useCommunityStore()
 const searchInput = ref('')
 const activeCategory = ref('all')
 
+function loadPosts() {
+  community.fetchPosts({
+    search: searchInput.value,
+    category: activeCategory.value,
+    page: currentPage.value,
+    limit: PAGE_SIZE,
+  })
+}
+
 onMounted(() => {
-  community.init()
   searchInput.value = route.query.q || ''
+  loadPosts()
 })
 
 const currentPage = computed(() => Number(route.query.page) || 1)
 
-const filteredPosts = computed(() => community.filtered(activeCategory.value, searchInput.value))
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredPosts.value.length / PAGE_SIZE)))
-const pagedPosts = computed(() => {
-  const start = (currentPage.value - 1) * PAGE_SIZE
-  return filteredPosts.value.slice(start, start + PAGE_SIZE)
-})
+const pagedPosts = computed(() => community.posts)
+const totalPages = computed(() => Math.max(1, Math.ceil(community.total / PAGE_SIZE)))
 
 watch([activeCategory, searchInput], () => {
-  router.replace({ name: 'CommunityList', query: {} })
+  if (currentPage.value !== 1) {
+    router.replace({ name: 'CommunityList', query: {} })
+  } else {
+    loadPosts()
+  }
+})
+
+watch(currentPage, () => {
+  loadPosts()
 })
 
 function selectCategory(key) {
@@ -51,40 +64,42 @@ function goToWrite() {
     <section class="hero">
       <div class="hero__overlay">
         <h1>Busan Community</h1>
-        <p>부산 여행의 팁과 숨겨진 명소를 이웃들과 함께 나눠보세요.</p>
+        <p>부산의 매력을 발견하고, 나만의 숨은 명소와 맛집 이야기를 여행자들과 나누어보세요.</p>
       </div>
     </section>
 
-    <div class="toolbar">
-      <div class="toolbar__search">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <circle cx="11" cy="11" r="7" />
-          <path d="m21 21-4.3-4.3" stroke-linecap="round" />
-        </svg>
-        <input v-model="searchInput" type="text" placeholder="게시글 검색..." />
+    <div class="community__content">
+      <div class="toolbar">
+        <div class="toolbar__search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m21 21-4.3-4.3" stroke-linecap="round" />
+          </svg>
+          <input v-model="searchInput" type="text" placeholder="게시글 검색..." />
+        </div>
+        <button type="button" class="toolbar__write" @click="goToWrite">✎ 글쓰기</button>
       </div>
-      <button type="button" class="toolbar__write" @click="goToWrite">✎ 글쓰기</button>
+
+      <nav class="filters">
+        <button
+          v-for="cat in POST_CATEGORIES"
+          :key="cat.key"
+          type="button"
+          class="filters__pill"
+          :class="{ 'filters__pill--active': cat.key === activeCategory }"
+          @click="selectCategory(cat.key)"
+        >
+          {{ cat.label }}
+        </button>
+      </nav>
+
+      <p v-if="!pagedPosts.length" class="community__empty">게시글이 없습니다.</p>
+      <div v-else class="post-grid">
+        <PostCard v-for="post in pagedPosts" :key="post.id" :post="post" />
+      </div>
+
+      <Pagination :current-page="currentPage" :total-pages="totalPages" @change="goToPage" />
     </div>
-
-    <nav class="filters">
-      <button
-        v-for="cat in POST_CATEGORIES"
-        :key="cat.key"
-        type="button"
-        class="filters__pill"
-        :class="{ 'filters__pill--active': cat.key === activeCategory }"
-        @click="selectCategory(cat.key)"
-      >
-        {{ cat.label }}
-      </button>
-    </nav>
-
-    <p v-if="!pagedPosts.length" class="community__empty">게시글이 없습니다.</p>
-    <div v-else class="post-grid">
-      <PostCard v-for="post in pagedPosts" :key="post.id" :post="post" />
-    </div>
-
-    <Pagination :current-page="currentPage" :total-pages="totalPages" @change="goToPage" />
   </div>
 </template>
 
@@ -93,41 +108,43 @@ function goToWrite() {
 @use '@/assets/styles/mixins' as *;
 
 .community {
-  @include container;
-  padding-top: 32px;
+  display: flex;
+  flex-direction: column;
   padding-bottom: 64px;
+}
+
+.community__content {
+  @include container;
+  max-width: 1440px;
+  padding-top: 32px;
   display: flex;
   flex-direction: column;
   gap: 28px;
 }
 
 .hero {
-  margin: 0 -24px;
-  height: 260px;
-  background:
-    linear-gradient(180deg, rgba(10, 20, 35, 0.55) 0%, rgba(10, 20, 35, 0.75) 100%),
-    url('https://tong.visitkorea.or.kr/cms/resource/77/3368477_image2_1.jpg') center / cover
-      no-repeat;
-  display: flex;
-  align-items: flex-end;
-  padding: 0 24px 32px;
+  padding: 56px 24px 40px;
+  background-color: $color-bg-soft;
+  background-image: radial-gradient(circle, rgba(22, 48, 92, 0.08) 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
 }
 
 .hero__overlay {
-  color: $color-white;
   max-width: $max-width;
   margin: 0 auto;
   width: 100%;
 
   h1 {
-    margin: 0 0 8px;
-    font-size: 34px;
+    margin: 0 0 12px;
+    font-size: 40px;
+    font-weight: 800;
+    color: $color-navy;
   }
 
   p {
     margin: 0;
-    font-size: 14px;
-    opacity: 0.9;
+    font-size: 15px;
+    color: $color-text-muted;
   }
 }
 
@@ -141,9 +158,9 @@ function goToWrite() {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 18px;
+  padding: 14px 20px;
   border: 1px solid $color-border;
-  border-radius: $radius-md;
+  border-radius: $radius-full;
   background: $color-white;
 
   svg {
@@ -162,9 +179,9 @@ function goToWrite() {
 }
 
 .toolbar__write {
-  padding: 0 22px;
+  padding: 0 24px;
   border: none;
-  border-radius: $radius-md;
+  border-radius: $radius-full;
   background: $color-navy;
   color: $color-white;
   font-size: 14px;
@@ -204,6 +221,12 @@ function goToWrite() {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+}
+
+@media (min-width: 1300px) {
+  .post-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 @media (max-width: 960px) {

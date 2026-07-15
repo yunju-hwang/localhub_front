@@ -1,26 +1,28 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useCommunityStore } from '../store'
 import { categoryLabel } from '../constants'
 import { formatRelativeTime } from '@/utils/date'
 import { formatCompactNumber } from '@/utils/format'
 import PasswordPrompt from '@/components/common/PasswordPrompt.vue'
+import CommentSection from '../components/CommentSection.vue'
 
 const route = useRoute()
 const router = useRouter()
 const community = useCommunityStore()
 
-const post = computed(() => community.getById(route.params.id))
+const post = computed(() => community.currentPost)
 
 const pendingAction = ref(null) // 'edit' | 'delete' | null
 const passwordError = ref('')
 const verifying = ref(false)
 
-onMounted(() => {
-  community.init()
-  community.incrementViews(route.params.id)
-})
+watch(
+  () => route.params.id,
+  (id) => community.fetchPost(id),
+  { immediate: true },
+)
 
 function requestEdit() {
   if (community.isUnlocked(post.value.id)) {
@@ -55,14 +57,14 @@ async function submitPassword(password) {
     pendingAction.value = null
     router.push({ name: 'PostEdit', params: { id: post.value.id } })
   } else if (pendingAction.value === 'delete') {
-    community.deletePost(post.value.id)
+    await community.deletePost(post.value.id)
     pendingAction.value = null
     router.push({ name: 'CommunityList' })
   }
 }
 
 function toggleLike() {
-  post.value.likes += 1
+  community.likePost(post.value.id)
 }
 </script>
 
@@ -81,7 +83,7 @@ function toggleLike() {
           </svg>
           {{ post.author }}
         </span>
-        <span>{{ formatRelativeTime(post.createdAt) }}</span>
+        <span>{{ formatRelativeTime(post.created_at) }}</span>
         <span>👁 {{ formatCompactNumber(post.views) }}</span>
       </div>
 
@@ -90,14 +92,21 @@ function toggleLike() {
       <p class="post-detail__content">{{ post.content }}</p>
 
       <div class="post-detail__actions">
-        <button type="button" class="post-detail__like" @click="toggleLike">
-          ♡ 좋아요 {{ formatCompactNumber(post.likes) }}
+        <button
+          type="button"
+          class="post-detail__like"
+          :class="{ 'post-detail__like--active': post.is_liked }"
+          @click="toggleLike"
+        >
+          {{ post.is_liked ? '♥' : '♡' }} 좋아요 {{ formatCompactNumber(post.likes) }}
         </button>
         <div class="post-detail__manage">
           <button type="button" class="post-detail__edit" @click="requestEdit">수정</button>
           <button type="button" class="post-detail__delete" @click="requestDelete">삭제</button>
         </div>
       </div>
+
+      <CommentSection :post-id="post.id" />
     </template>
     <p v-else>게시글을 찾을 수 없습니다.</p>
 
@@ -194,6 +203,11 @@ function toggleLike() {
   padding: 8px 18px;
   background: $color-white;
   font-size: 14px;
+}
+
+.post-detail__like--active {
+  border-color: #e11d48;
+  color: #e11d48;
 }
 
 .post-detail__manage {

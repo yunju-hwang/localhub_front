@@ -6,7 +6,7 @@ import { POST_CATEGORIES } from '../constants'
 import PostCard from '../components/PostCard.vue'
 import Pagination from '@/components/common/Pagination.vue'
 
-const PAGE_SIZE = 6
+const PAGE_SIZE = 8
 
 const route = useRoute()
 const router = useRouter()

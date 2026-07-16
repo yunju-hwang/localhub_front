@@ -26,7 +26,11 @@ function goToFullList() {
 
 function handleSearch() {
   if (!searchTerm.value.trim()) return
-  router.push({ name: 'TourismList', params: { category: activeKey.value } })
+  router.push({
+    name: 'TourismList',
+    params: { category: activeKey.value },
+    query: { q: searchTerm.value.trim() },
+  })
 }
 
 // 프로모션 섹션 이미지는 실제 축제/문화시설 데이터에서 가져온다.

@@ -11,15 +11,13 @@ const CATEGORY_FILE_MAP = {
 }
 
 function normalizeItem(raw) {
-  const images = [raw.firstimage, raw.firstimage2].filter(Boolean)
   return {
     id: raw.contentid,
     title: raw.title,
     address: raw.addr1 || '주소 정보 없음',
     lat: raw.mapy ? parseFloat(raw.mapy) : null,
     lng: raw.mapx ? parseFloat(raw.mapx) : null,
-    image: images[0] || null,
-    images,
+    image: raw.firstimage || null,
     tel: raw.tel || null,
   }
 }

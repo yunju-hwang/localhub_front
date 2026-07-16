@@ -18,11 +18,6 @@ const spot = computed(() =>
   tourism.itemsOf(category.value).find((item) => item.id === route.params.id),
 )
 
-const activeImageIndex = ref(0)
-watch(spot, () => {
-  activeImageIndex.value = 0
-})
-
 onMounted(() => tourism.fetchAll())
 
 const detail = ref(null)
@@ -78,25 +73,7 @@ const nearbySpots = computed(() => {
     </RouterLink>
 
     <template v-if="spot">
-      <div v-if="spot.images.length" class="spot-detail__gallery">
-        <img
-          :src="spot.images[activeImageIndex]"
-          :alt="spot.title"
-          class="spot-detail__image"
-        />
-        <div v-if="spot.images.length > 1" class="spot-detail__thumbs">
-          <button
-            v-for="(img, i) in spot.images"
-            :key="img"
-            type="button"
-            class="spot-detail__thumb"
-            :class="{ 'spot-detail__thumb--active': i === activeImageIndex }"
-            @click="activeImageIndex = i"
-          >
-            <img :src="img" :alt="`${spot.title} 이미지 ${i + 1}`" />
-          </button>
-        </div>
-      </div>
+      <img v-if="spot.image" :src="spot.image" :alt="spot.title" class="spot-detail__image" />
       <h1>{{ spot.title }}</h1>
       <p class="spot-detail__address">📍 {{ spot.address }}</p>
 
@@ -177,50 +154,12 @@ const nearbySpots = computed(() => {
   color: $color-text-muted;
 }
 
-.spot-detail__gallery {
-  margin-bottom: 20px;
-}
-
 .spot-detail__image {
   width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;
   border-radius: $radius-lg;
-}
-
-.spot-detail__thumbs {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.spot-detail__thumb {
-  padding: 0;
-  border: 2px solid transparent;
-  border-radius: $radius-sm;
-  overflow: hidden;
-  width: 72px;
-  height: 54px;
-  flex: 0 0 auto;
-  opacity: 0.6;
-  transition:
-    opacity 0.15s ease,
-    border-color 0.15s ease;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  &:hover {
-    opacity: 0.85;
-  }
-}
-
-.spot-detail__thumb--active {
-  border-color: $color-navy;
-  opacity: 1;
+  margin-bottom: 20px;
 }
 
 h1 {

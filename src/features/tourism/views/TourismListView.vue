@@ -20,9 +20,7 @@ const allSpots = computed(() => tourism.itemsOf(activeKey.value))
 const filteredSpots = computed(() => {
   const q = searchInput.value.trim().toLowerCase()
   if (!q) return allSpots.value
-  return allSpots.value.filter(
-    (spot) => spot.title.toLowerCase().includes(q) || spot.address.toLowerCase().includes(q),
-  )
+  return allSpots.value.filter((spot) => matchesQuery(spot, q))
 })
 const totalPages = computed(() => Math.max(1, Math.ceil(filteredSpots.value.length / PAGE_SIZE)))
 const pagedSpots = computed(() => {
@@ -34,8 +32,22 @@ function load(category) {
   tourism.fetchCategory(category)
 }
 
-onMounted(() => load(activeKey.value))
+// 검색어를 넣으면 탭에 붙는 개수도 검색 결과 기준으로 바뀌어야 하므로,
+// 지금 보고 있는 카테고리뿐 아니라 전체 카테고리를 미리 불러온다.
+onMounted(() => tourism.fetchAll())
 watch(activeKey, (key) => load(key))
+
+function matchesQuery(spot, q) {
+  return spot.title.toLowerCase().includes(q) || spot.address.toLowerCase().includes(q)
+}
+
+function countOf(category) {
+  const total = tourism.totalOf(category)
+  if (total === null) return null
+  const q = searchInput.value.trim().toLowerCase()
+  if (!q) return total
+  return tourism.itemsOf(category).filter((spot) => matchesQuery(spot, q)).length
+}
 
 function selectCategory(key) {
   router.push({
@@ -71,7 +83,7 @@ watch(
     <CategoryTabs
       :categories="tourism.categories"
       :active-key="activeKey"
-      :count-of="tourism.totalOf"
+      :count-of="countOf"
       @select="selectCategory"
     />
 
